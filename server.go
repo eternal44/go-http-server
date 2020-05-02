@@ -2,12 +2,19 @@ package main
 
 import (
 	"net/http"
-  "sourcegraph/server/request/handlers"
+  "sourcegraph/server/request"
 	"log"
+  "github.com/gorilla/mux"
 )
 
 func main() {
-	http.HandleFunc("/view/", handlers.MakeHandler(handlers.ViewHandler))
+  r := mux.NewRouter()
+  r.HandleFunc("/", handlers.HeartBeat)
+	r.HandleFunc("/view/{topic}", handlers.ViewHandler).Name("view")
+  http.Handle("/", r)
+
+  // http.HandleFunc("/", handlers.MultipleMiddleware(
+  //   handlers.HeartBeat))
 	http.HandleFunc("/edit/", handlers.MakeHandler(handlers.EditHandler))
 	http.HandleFunc("/save/", handlers.MakeHandler(handlers.SaveHandler))
 
