@@ -1,19 +1,15 @@
 package main
 
 import (
-  "fmt"
-	"io/ioutil"
-	"log"
 	"net/http"
-	"regexp"
-  "http/server/request/handlers"
+  "sourcegraph/server/request/handlers"
+	"log"
 )
 
 func main() {
-  fmt.Println("hello")
-	// http.HandleFunc("/view/", makeHandler(viewHandler))
-	// http.HandleFunc("/edit/", makeHandler(editHandler))
-	// http.HandleFunc("/save/", makeHandler(saveHandler))
+	http.HandleFunc("/view/", handlers.MakeHandler(handlers.ViewHandler))
+	http.HandleFunc("/edit/", handlers.MakeHandler(handlers.EditHandler))
+	http.HandleFunc("/save/", handlers.MakeHandler(handlers.SaveHandler))
 
-	// log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
