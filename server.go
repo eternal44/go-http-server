@@ -1,7 +1,10 @@
 package main
 
-import "fmt"
+import (
+  "fmt"
+  "sourcegraph/server/morestrings"
+)
 
 func main() {
-  fmt.Println("hello")
+  fmt.Println(morestrings.ReverseRunes("hello"))
 }
