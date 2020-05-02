@@ -5,9 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"regexp"
-  "fmt"
-  "log"
-  "os"
   "github.com/gorilla/mux"
 )
 
@@ -57,7 +54,8 @@ func MakeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.Handl
 	}
 }
 
-func SaveHandler(w http.ResponseWriter, r *http.Request, title string) {
+func Save(w http.ResponseWriter, r *http.Request) {
+  title := mux.Vars(r)["topic"]
 	body := r.FormValue("body")
 	p := &Page{Title: title, Body: []byte(body)}
 	err := p.save()
@@ -69,7 +67,8 @@ func SaveHandler(w http.ResponseWriter, r *http.Request, title string) {
 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
 }
 
-func EditHandler(w http.ResponseWriter, r *http.Request, title string) {
+func Edit(w http.ResponseWriter, r *http.Request) {
+  title := mux.Vars(r)["topic"]
 	p, err := loadPage(title)
 	if err != nil {
 		p = &Page{Title: title}
@@ -77,8 +76,7 @@ func EditHandler(w http.ResponseWriter, r *http.Request, title string) {
 	renderTemplate(w, "edit", p)
 }
 
-func ViewHandler(w http.ResponseWriter, r *http.Request) {
-	_, err := mux.CurrentRoute(r).Subrouter().Get("view").URL()
+func View(w http.ResponseWriter, r *http.Request) {
   title := mux.Vars(r)["topic"]
 	p, err := loadPage(title)
 	if err != nil {
@@ -88,31 +86,3 @@ func ViewHandler(w http.ResponseWriter, r *http.Request) {
 
 	renderTemplate(w, "view", p)
 }
-
-type Middleware func(http.HandlerFunc) http.HandlerFunc
-
-func MultipleMiddleware(h http.HandlerFunc, m ...Middleware) http.HandlerFunc {
-   if len(m) < 1 {
-      return h
-   }
-   wrapped := h
-   // loop in reverse to preserve middleware order
-   for i := len(m) - 1; i >= 0; i-- {
-      wrapped = m[i](wrapped)
-   }
-   return wrapped
-}
-
-func LogMiddleware(h http.HandlerFunc) http.HandlerFunc {
-  return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-    log.SetOutput(os.Stdout) // logs go to Stderr by default
-    log.Println(r.Method, r.URL)
-    h.ServeHTTP(w, r) // call ServeHTTP on the original handler
-
-  })
-}
-
-func HeartBeat(w http.ResponseWriter, r *http.Request) {
-  fmt.Fprintf(w, "### alive ###")
-}
-
